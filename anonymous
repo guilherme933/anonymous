@@ -1,0 +1,86 @@
+import pygame
+import sys
+
+# Inicializa o Pygame
+pygame.init()
+
+# Configurações da Tela
+WIDTH, HEIGHT = 800, 600
+BALL_RADIUS = 20
+PAD_WIDTH = 8
+PAD_HEIGHT = 80
+BALL_POS = [WIDTH // 2, HEIGHT // 2]
+BALL_VEL = [0, 0]
+PADDLE1_POS = [PAD_WIDTH // 2, HEIGHT // 2 - PAD_HEIGHT // 2]
+PADDLE2_POS = [WIDTH - PAD_WIDTH // 2 - PAD_WIDTH, HEIGHT // 2 - PAD_HEIGHT // 2]
+PADDLE1_VEL = 5
+PADDLE2_VEL = 5
+BALL_VELOCITY = 5
+
+# Cores
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+
+# Configura a tela
+window = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Pong")
+
+# Função para desenhar elementos na tela
+def draw(canvas):
+    global BALL_POS, BALL_VEL, PADDLE1_POS, PADDLE2_POS
+    
+    canvas.fill(BLACK)
+    pygame.draw.circle(canvas, WHITE, BALL_POS, BALL_RADIUS, 0)
+    pygame.draw.line(canvas, WHITE, [WIDTH // 2, 0], [WIDTH // 2, HEIGHT], 1)
+    pygame.draw.rect(canvas, WHITE, (PADDLE1_POS[0], PADDLE1_POS[1], PAD_WIDTH, PAD_HEIGHT), 0)
+    pygame.draw.rect(canvas, WHITE, (PADDLE2_POS[0], PADDLE2_POS[1], PAD_WIDTH, PAD_HEIGHT), 0)
+    
+    BALL_POS[0] += BALL_VEL[0]
+    BALL_POS[1] += BALL_VEL[1]
+
+    if BALL_POS[1] <= BALL_RADIUS or BALL_POS[1] >= HEIGHT - BALL_RADIUS:
+        BALL_VEL[1] = -BALL_VEL[1]
+        
+    if BALL_POS[0] <= PAD_WIDTH + BALL_RADIUS:
+        if PADDLE1_POS[1] < BALL_POS[1] < PADDLE1_POS[1] + PAD_HEIGHT:
+            BALL_VEL[0] = -BALL_VEL[0]
+        else:
+            BALL_POS = [WIDTH // 2, HEIGHT // 2]
+            BALL_VEL = [BALL_VELOCITY, BALL_VELOCITY]
+            
+    if BALL_POS[0] >= WIDTH - PAD_WIDTH - BALL_RADIUS:
+        if PADDLE2_POS[1] < BALL_POS[1] < PADDLE2_POS[1] + PAD_HEIGHT:
+            BALL_VEL[0] = -BALL_VEL[0]
+        else:
+            BALL_POS = [WIDTH // 2, HEIGHT // 2]
+            BALL_VEL = [-BALL_VELOCITY, -BALL_VELOCITY]
+    
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w] and PADDLE1_POS[1] > 0:
+        PADDLE1_POS[1] -= PADDLE1_VEL
+    if keys[pygame.K_s] and PADDLE1_POS[1] < HEIGHT - PAD_HEIGHT:
+        PADDLE1_POS[1] += PADDLE1_VEL
+    if keys[pygame.K_UP] and PADDLE2_POS[1] > 0:
+        PADDLE2_POS[1] -= PADDLE2_VEL
+    if keys[pygame.K_DOWN] and PADDLE2_POS[1] < HEIGHT - PAD_HEIGHT:
+        PADDLE2_POS[1] += PADDLE2_VEL
+
+# Loop Principal
+def main():
+    global BALL_VEL
+    
+    BALL_VEL = [BALL_VELOCITY, BALL_VELOCITY]
+    
+    clock = pygame.time.Clock()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        
+        draw(window)
+        pygame.display.flip()
+        clock.tick(60)
+
+if __name__ == "__main__":
+    main()
